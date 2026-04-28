@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Implementation Dashboard</title>
+    <title>Project Progress Dashboard</title>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel for compiling JSX in the browser -->
+    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Tailwind CSS for styling -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100">
@@ -22,35 +22,68 @@
         const { useState, useEffect } = React;
 
         /**
-         * CSV DATA FALLBACK
-         * If you are running this as a local file (file://), the browser might block 'fetch'.
-         * You can paste your 4 subjects from progress.csv here to ensure it works offline.
+         * UPDATED CSV FALLBACK: Contains all 4 subjects from your file.
+         * Subject discovery is now dynamic.
          */
-        const csvDataFallback = `"Subject","Step Number","Phase","Description","Status"`;
+        const csvDataFallback = `"Subject","Step Number","Phase","Description","Status"
+"Social Studies","1","Curriculum & UbD Training","Engaging in foundational training.","0"
+"Social Studies","2","Framework Alignment & Tool Vetting","Introducing planning tools.","0"
+"Social Studies","3","Macro-Level Unit Planning","Determining pacing and sequence.","0"
+"Social Studies","4","Initial Unit Drafting","Developing transfer goals.","0"
+"Social Studies","5","Resource Gathering & Exploration","Curating supporting resources.","0"
+"Social Studies","6","Consolidation & Streamlining","Finalizing assessment plans.","0"
+"Social Studies","7","Micro-Level Lesson Build-Out","Specific lesson planning.","0"
+"Social Studies","8","Scaling & Progression","Developing supporting resources.","0"
+"Social Studies","9","Resource Hub Consolidation","Uploading to resource hub.","0"
+"Social Studies","10","Launch Preparation","Logistical needs for rollout.","0"
+"Social Studies","Goal","Final September Goal","First unit for grade 7 completed.","0"
+"Career Education and Financial Literacy (CEFL)","1","Curriculum & UbD Training","Engaging in foundational training.","0"
+"Career Education and Financial Literacy (CEFL)","2","Framework Alignment & Tool Vetting","Introducing planning tools.","0"
+"Career Education and Financial Literacy (CEFL)","3","Macro-Level Unit Planning","Determining pacing and sequence.","0"
+"Career Education and Financial Literacy (CEFL)","4","Initial Unit Drafting","Developing transfer goals.","0"
+"Career Education and Financial Literacy (CEFL)","5","Resource Gathering & Exploration","Curating supporting resources.","0"
+"Career Education and Financial Literacy (CEFL)","6","Consolidation & Streamlining","Finalizing assessment plans.","0"
+"Career Education and Financial Literacy (CEFL)","7","Micro-Level Lesson Build-Out","Specific lesson planning.","0"
+"Career Education and Financial Literacy (CEFL)","8","Scaling & Progression","Developing supporting resources.","0"
+"Career Education and Financial Literacy (CEFL)","9","Resource Hub Consolidation","Uploading to resource hub.","0"
+"Career Education and Financial Literacy (CEFL)","10","Launch Preparation","Logistical needs for rollout.","0"
+"Career Education and Financial Literacy (CEFL)","Goal","Final September Goal","First unit for grades 7, 8, and 9 completed.","0"
+"Science","1","Curriculum & UbD Training","Engaging in foundational training.","0"
+"Science","2","Framework Alignment & Tool Vetting","Introducing planning tools.","0"
+"Science","3","Macro-Level Unit Planning","Determining pacing and sequence.","0"
+"Science","4","Initial Unit Drafting","Developing transfer goals.","0"
+"Science","5","Resource Gathering & Exploration","Curating supporting resources.","0"
+"Science","6","Consolidation & Streamlining","Finalizing assessment plans.","0"
+"Science","7","Micro-Level Lesson Build-Out","Specific lesson planning.","0"
+"Science","8","Scaling & Progression","Developing supporting resources.","0"
+"Science","9","Resource Hub Consolidation","Uploading to resource hub.","0"
+"Science","10","Launch Preparation","Logistical needs for rollout.","0"
+"Science","Goal","Final September Goal","First unit for grade 8 science completed.","0"
+"Mathematics","1","Curriculum & UbD Training","Engaging in foundational training.","0"
+"Mathematics","2","Framework Alignment & Tool Vetting","Introducing planning tools.","0"
+"Mathematics","3","Macro-Level Unit Planning","Determining pacing and sequence.","0"
+"Mathematics","4","Initial Unit Drafting","Developing transfer goals.","0"
+"Mathematics","5","Resource Gathering & Exploration","Curating supporting resources.","0"
+"Mathematics","6","Consolidation & Streamlining","Finalizing assessment plans.","0"
+"Mathematics","7","Micro-Level Lesson Build-Out","Specific lesson planning.","0"
+"Mathematics","8","Scaling & Progression","Developing supporting resources.","0"
+"Mathematics","9","Resource Hub Consolidation","Uploading to resource hub.","0"
+"Mathematics","10","Launch Preparation","Logistical needs for rollout.","0"
+"Mathematics","Goal","Final September Goal","First unit for grade 9 mathematics completed.","0"`;
 
-        // --- INLINE ICON COMPONENTS ---
-        const IconSVG = ({ children, className }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                {children}
-            </svg>
-        );
-        const CalendarIcon = ({className}) => <IconSVG className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></IconSVG>;
-        const ClockIcon = ({className}) => <IconSVG className={className}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></IconSVG>;
-        const SnowflakeIcon = ({className}) => <IconSVG className={className}><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line><line x1="20" y1="16" x2="4" y2="8"></line><line x1="20" y1="8" x2="4" y2="16"></line></IconSVG>;
-        const ThermometerIcon = ({className}) => <IconSVG className={className}><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path></IconSVG>;
-        const ThermometerSunIcon = ({className}) => <IconSVG className={className}><path d="M12 9a4 4 0 0 0-2 7.5"></path><path d="M12 3v2"></path><path d="M6.6 18.4l-1.4 1.4"></path><path d="M20 4l-1.4 1.4"></path><path d="M4 22l1.4-1.4"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path></IconSVG>;
-        const FlameIcon = ({className}) => <IconSVG className={className}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></IconSVG>;
-        const CheckCircleIcon = ({className}) => <IconSVG className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></IconSVG>;
-        const CircleIcon = ({className}) => <IconSVG className={className}><circle cx="12" cy="12" r="10"></circle></IconSVG>;
-        const PlayCircleIcon = ({className}) => <IconSVG className={className}><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></IconSVG>;
-        const ChevronDownIcon = ({className}) => <IconSVG className={className}><polyline points="6 9 12 15 18 9"></polyline></IconSVG>;
-        const ChevronUpIcon = ({className}) => <IconSVG className={className}><polyline points="18 15 12 9 6 15"></polyline></IconSVG>;
+        // --- SVGs ---
+        const CalendarIcon = () => <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>;
+        const ClockIcon = () => <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
+        const SnowflakeIcon = () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line><line x1="20" y1="16" x2="4" y2="8"></line><line x1="20" y1="8" x2="4" y2="16"></line></svg>;
+        const ThermometerIcon = () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path></svg>;
+        const SunIcon = () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>;
+        const FlameIcon = () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>;
+        const CheckIcon = () => <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
 
         function App() {
             const [subjects, setSubjects] = useState([]);
             const [now, setNow] = useState(new Date());
-            const [expandedSubject, setExpandedSubject] = useState(null);
-            const [error, setError] = useState(null);
+            const [expanded, setExpanded] = useState(null);
 
             useEffect(() => {
                 const timer = setInterval(() => setNow(new Date()), 60000);
@@ -59,220 +92,123 @@
 
             const parseCSV = (text) => {
                 const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
-                const parsedSubjects = {};
+                const parsed = {};
 
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i];
-                    // Basic CSV parser to handle quotes
                     const cols = [];
-                    let current = '';
-                    let inQuotes = false;
+                    let cur = '';
+                    let inQ = false;
                     for (let char of line) {
-                        if (char === '"') inQuotes = !inQuotes;
-                        else if (char === ',' && !inQuotes) {
-                            cols.push(current.trim());
-                            current = '';
-                        } else {
-                            current += char;
-                        }
+                        if (char === '"') inQ = !inQ;
+                        else if (char === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+                        else cur += char;
                     }
-                    cols.push(current.trim());
+                    cols.push(cur.trim());
 
-                    const [subjectName, stepRaw, phase, desc, statusRaw] = cols;
-                    if (!subjectName) continue;
+                    const [subName, stepRaw, phase, desc, statusRaw] = cols;
+                    if (!subName) continue;
 
-                    if (!parsedSubjects[subjectName]) {
-                        parsedSubjects[subjectName] = { 
-                            id: `s_${subjectName.replace(/\s+/g, '_')}`, 
-                            name: subjectName, 
-                            goal: "", 
-                            milestones: [] 
-                        };
+                    if (!parsed[subName]) {
+                        parsed[subName] = { name: subName, goal: "", milestones: [] };
                     }
 
                     if (stepRaw && stepRaw.toLowerCase() === 'goal') {
-                        parsedSubjects[subjectName].goal = desc;
+                        parsed[subName].goal = desc;
                     } else if (stepRaw) {
-                        const stepNum = parseInt(stepRaw);
-                        if (!isNaN(stepNum)) {
-                            parsedSubjects[subjectName].milestones.push({
-                                step: stepNum,
-                                phase: phase || '',
-                                description: desc || '',
-                                status: parseInt(statusRaw) || 0
-                            });
+                        const sNum = parseInt(stepRaw);
+                        if (!isNaN(sNum)) {
+                            let stat = parseInt(statusRaw);
+                            if (isNaN(stat)) stat = 0; // Default to 0
+                            parsed[subName].milestones.push({ step: sNum, phase, desc, status: stat });
                         }
                     }
                 }
                 
-                const newSubjectsArray = Object.values(parsedSubjects).map(sub => {
-                    sub.milestones.sort((a,b) => a.step - b.step);
-                    return sub;
+                const finalArray = Object.values(parsed).map(s => {
+                    s.milestones.sort((a,b) => a.step - b.step);
+                    return s;
                 });
-
-                if (newSubjectsArray.length > 0) {
-                    setSubjects(newSubjectsArray);
-                    setError(null);
-                } else {
-                    setError("No subjects found in CSV. Please check formatting.");
-                }
+                setSubjects(finalArray);
             };
 
             useEffect(() => {
-                const loadData = async () => {
+                const load = async () => {
                     try {
-                        const response = await fetch('./progress.csv');
-                        if (!response.ok) throw new Error();
-                        const text = await response.text();
+                        const res = await fetch('./progress.csv');
+                        if (!res.ok) throw new Error();
+                        const text = await res.text();
                         parseCSV(text);
-                    } catch (e) {
-                        if (csvDataFallback.split('\n').length > 1) {
-                            parseCSV(csvDataFallback);
-                        } else {
-                            setError("Could not load 'progress.csv'. Ensure it is in the same folder as this file.");
-                        }
+                    } catch {
+                        parseCSV(csvDataFallback);
                     }
                 };
-                loadData();
+                load();
             }, []);
 
-            const targetDate = new Date('2026-09-01T00:00:00');
-            const diffTime = targetDate.getTime() - now.getTime();
-            const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
-            const formattedDate = now.toLocaleDateString('en-US', { 
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-            });
+            const target = new Date('2026-09-01T00:00:00');
+            const diff = target - now;
+            const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+            const formattedDate = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            // Local state update only (User must update CSV to persist)
-            const updateMilestone = (subjectId, stepIdx, newStatus) => {
-                setSubjects(prev => prev.map(sub => {
-                    if (sub.id !== subjectId) return sub;
-                    const newMilestones = [...sub.milestones];
-                    newMilestones[stepIdx] = { ...newMilestones[stepIdx], status: newStatus };
-                    return { ...sub, milestones: newMilestones };
-                }));
+            const getTemp = (milestones) => {
+                const score = milestones.reduce((a, c) => a + c.status, 0);
+                const max = milestones.length * 2;
+                const perc = Math.round((score / max) * 100) || 0;
+                if (perc === 100) return { label: 'Complete!', color: 'text-green-600 bg-green-100', icon: <CheckIcon />, perc };
+                if (perc >= 80) return { label: 'On Fire!', color: 'text-red-600 bg-red-100', icon: <FlameIcon />, perc };
+                if (perc >= 50) return { label: 'Hot', color: 'text-orange-500 bg-orange-100', icon: <SunIcon />, perc };
+                if (perc >= 25) return { label: 'Warming Up', color: 'text-yellow-600 bg-yellow-100', icon: <ThermometerIcon />, perc };
+                return { label: 'Cold', color: 'text-blue-500 bg-blue-100', icon: <SnowflakeIcon />, perc };
             };
-
-            const getTemperatureData = (milestones) => {
-                const score = milestones.reduce((acc, curr) => acc + curr.status, 0);
-                const maxScore = milestones.length * 2;
-                const percentage = Math.round((score / maxScore) * 100) || 0;
-                
-                let colorClass, label, Icon;
-                if (percentage < 25) {
-                    colorClass = 'text-blue-500 bg-blue-100 border-blue-200';
-                    label = 'Cold';
-                    Icon = SnowflakeIcon;
-                } else if (percentage < 50) {
-                    colorClass = 'text-yellow-600 bg-yellow-100 border-yellow-200';
-                    label = 'Warming Up';
-                    Icon = ThermometerIcon;
-                } else if (percentage < 80) {
-                    colorClass = 'text-orange-500 bg-orange-100 border-orange-200';
-                    label = 'Hot';
-                    Icon = ThermometerSunIcon;
-                } else {
-                    colorClass = 'text-red-600 bg-red-100 border-red-200';
-                    label = 'On Fire!';
-                    Icon = FlameIcon;
-                }
-
-                if (percentage === 100) {
-                    colorClass = 'text-green-600 bg-green-100 border-green-200';
-                    label = 'Complete!';
-                    Icon = CheckCircleIcon;
-                }
-
-                return { score, maxScore, percentage, colorClass, label, Icon };
-            };
-
-            const totalProjectPercentage = subjects.length > 0 ? Math.round(
-                (subjects.reduce((acc, sub) => acc + sub.milestones.reduce((mAcc, m) => mAcc + m.status, 0), 0) / 
-                (subjects.reduce((acc, sub) => acc + sub.milestones.length, 0) * 2)) * 100
-            ) : 0;
 
             return (
-                <div className="min-h-screen font-sans text-slate-800 pb-12">
-                    <header className="bg-slate-900 text-white shadow-lg pb-6 pt-8 px-6 md:px-12">
-                        <div className="max-w-7xl mx-auto">
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                                <div>
-                                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">Project Implementation Dashboard</h1>
-                                    <p className="text-slate-400 text-lg flex items-center gap-2">
-                                        <CalendarIcon className="w-5 h-5" />
-                                        {formattedDate}
-                                    </p>
-                                </div>
-                                
-                                <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 flex items-center gap-4 shadow-inner">
-                                    <div className="bg-indigo-500/20 p-3 rounded-full">
-                                        <ClockIcon className="w-8 h-8 text-indigo-400" />
-                                    </div>
-                                    <div>
-                                        <p className="text-slate-300 text-sm font-medium uppercase tracking-wider">Launch Countdown</p>
-                                        <div className="flex items-baseline gap-2">
-                                            <span className={`text-4xl font-extrabold ${daysRemaining < 30 ? 'text-red-400' : 'text-indigo-300'}`}>
-                                                {daysRemaining}
-                                            </span>
-                                            <span className="text-slate-400">days left</span>
-                                        </div>
-                                        <p className="text-xs text-slate-500">Goal: September 1, 2026</p>
-                                    </div>
-                                </div>
+                <div className="min-h-screen pb-12">
+                    <header className="bg-slate-900 text-white p-8 shadow-xl">
+                        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div>
+                                <h1 className="text-4xl font-bold mb-2">Project Progress Dashboard</h1>
+                                <p className="text-slate-400 flex items-center gap-2 text-lg"><CalendarIcon /> {formattedDate}</p>
                             </div>
-
-                            <div className="mt-8">
-                                <div className="flex justify-between text-sm mb-2 font-medium">
-                                    <span>Total Scope Completion</span>
-                                    <span>{totalProjectPercentage}%</span>
-                                </div>
-                                <div className="w-full bg-slate-800 rounded-full h-3">
-                                    <div className="bg-indigo-500 h-3 rounded-full transition-all duration-1000" style={{ width: `${totalProjectPercentage}%` }}></div>
+                            <div className="bg-slate-800 p-6 rounded-2xl flex items-center gap-6 border border-slate-700 shadow-inner">
+                                <div className="text-indigo-400 bg-indigo-500/10 p-3 rounded-full"><ClockIcon /></div>
+                                <div>
+                                    <p className="text-xs uppercase tracking-widest text-slate-400 font-bold mb-1">Launch Target</p>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-5xl font-black text-indigo-300">{daysLeft}</span>
+                                        <span className="text-slate-400 font-bold uppercase text-sm tracking-widest">Days Left</span>
+                                    </div>
+                                    <p className="text-[10px] text-slate-500 mt-1 uppercase font-bold">Deadline: Sept 1, 2026</p>
                                 </div>
                             </div>
                         </div>
                     </header>
 
-                    <main className="max-w-7xl mx-auto px-4 md:px-12 mt-8">
-                        {error && (
-                            <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl mb-8 font-medium">
-                                {error}
-                            </div>
-                        )}
-
-                        <h2 className="text-xl font-bold mb-4 text-slate-700 flex items-center gap-2">
-                            <ThermometerSunIcon className="w-6 h-6 text-slate-500" />
-                            Subject Progress & Heat Maps
+                    <main className="max-w-7xl mx-auto px-6 mt-12">
+                        <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                            <span className="w-2 h-8 bg-indigo-500 rounded-full"></span>
+                            Subject Temperature Checks
                         </h2>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                            {subjects.map(subject => {
-                                const temp = getTemperatureData(subject.milestones);
-                                const Icon = temp.Icon;
+                            {subjects.map(s => {
+                                const t = getTemp(s.milestones);
                                 return (
-                                    <div key={`temp-${subject.id}`} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-md transition">
+                                    <div key={s.name} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col justify-between">
                                         <div>
-                                            <h3 className="font-bold text-lg mb-1 leading-tight text-slate-800">{subject.name}</h3>
-                                            <p className="text-xs text-slate-500 mb-4 line-clamp-3 italic" title={subject.goal}>{subject.goal || 'Final goal not defined'}</p>
+                                            <h3 className="text-xl font-bold text-slate-900 mb-2 leading-tight">{s.name}</h3>
+                                            <p className="text-xs text-slate-500 mb-4 italic leading-relaxed">"{s.goal || 'No goal set'}"</p>
                                         </div>
                                         <div>
-                                            <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border mb-4 ${temp.colorClass}`}>
-                                                <Icon className="w-4 h-4" />
-                                                {temp.label}
+                                            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider mb-4 border ${t.color}`}>
+                                                {t.icon} {t.label}
                                             </div>
-                                            <div className="flex justify-between items-end mb-2 text-sm font-medium">
-                                                <span className="text-slate-600">Score: {temp.score}/{temp.maxScore}</span>
-                                                <span className="text-slate-900 font-bold">{temp.percentage}%</span>
+                                            <div className="flex justify-between text-sm font-black text-slate-700 mb-2 uppercase tracking-tighter">
+                                                <span>Progress</span>
+                                                <span>{t.perc}%</span>
                                             </div>
-                                            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                                                <div 
-                                                    className="h-2 transition-all duration-500" 
-                                                    style={{ 
-                                                        width: `${temp.percentage}%`, 
-                                                        backgroundColor: temp.percentage < 25 ? '#3b82f6' : temp.percentage < 50 ? '#ca8a04' : temp.percentage < 80 ? '#f97316' : '#22c55e' 
-                                                    }}
-                                                ></div>
+                                            <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                                                <div className="h-full bg-indigo-500 transition-all duration-1000" style={{ width: `${t.perc}%` }}></div>
                                             </div>
                                         </div>
                                     </div>
@@ -280,68 +216,45 @@
                             })}
                         </div>
 
-                        <h2 className="text-xl font-bold mb-4 text-slate-700 flex items-center gap-2">
-                            <CheckCircleIcon className="w-6 h-6 text-slate-500" />
-                            Detailed Implementation Steps
+                        <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                            <span className="w-2 h-8 bg-indigo-500 rounded-full"></span>
+                            Detailed Milestones
                         </h2>
                         
                         <div className="space-y-4">
-                            {subjects.map((subject, subIndex) => (
-                                <div key={`detail-${subject.id}`} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                                    <button 
-                                        onClick={() => setExpandedSubject(expandedSubject === subject.id ? null : subject.id)}
-                                        className="w-full p-6 flex items-center justify-between bg-white hover:bg-slate-50 transition text-left"
-                                    >
+                            {subjects.map(s => (
+                                <div key={s.name} className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                                    <button onClick={() => setExpanded(expanded === s.name ? null : s.name)} className="w-full p-6 flex justify-between items-center hover:bg-slate-50 transition">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
-                                                {subIndex + 1}
+                                            <div className="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shadow-indigo-200">
+                                                {s.name[0]}
                                             </div>
-                                            <div>
-                                                <h3 className="font-bold text-xl text-slate-800">{subject.name}</h3>
-                                                <p className="text-sm text-slate-500">{subject.milestones.filter(m => m.status === 2).length} of {subject.milestones.length} milestones complete</p>
+                                            <div className="text-left">
+                                                <h3 className="text-xl font-bold text-slate-900">{s.name}</h3>
+                                                <p className="text-sm text-slate-500 font-medium">10 Milestones Tracked</p>
                                             </div>
                                         </div>
-                                        {expandedSubject === subject.id ? <ChevronUpIcon className="w-6 h-6 text-slate-400" /> : <ChevronDownIcon className="w-6 h-6 text-slate-400" />}
+                                        <span className={`transition-transform duration-300 font-bold text-slate-400 ${expanded === s.name ? 'rotate-180' : ''}`}>▼</span>
                                     </button>
 
-                                    {expandedSubject === subject.id && (
-                                        <div className="border-t border-slate-100 bg-slate-50 p-6">
-                                            <div className="space-y-3">
-                                                {subject.milestones.map((milestone, mIndex) => (
-                                                    <div key={mIndex} className="bg-white rounded-xl p-4 border border-slate-200 flex flex-col lg:flex-row gap-4 justify-between lg:items-center hover:border-indigo-200 transition shadow-sm">
-                                                        <div className="flex items-start gap-4 flex-1">
-                                                            <div className="min-w-[2.5rem] h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-600 font-bold text-sm">
-                                                                {milestone.step}
-                                                            </div>
-                                                            <div>
-                                                                <h4 className="font-bold text-slate-800 text-base">{milestone.phase}</h4>
-                                                                <p className="text-sm text-slate-500 mt-1 leading-snug">{milestone.description}</p>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="flex bg-slate-100 p-1 rounded-lg self-start lg:self-center shrink-0">
-                                                            <button 
-                                                                onClick={() => updateMilestone(subject.id, mIndex, 0)}
-                                                                className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-bold transition-all ${milestone.status === 0 ? 'bg-white text-slate-700 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
-                                                            >
-                                                                <CircleIcon className="w-3.5 h-3.5" /> Pending
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => updateMilestone(subject.id, mIndex, 1)}
-                                                                className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-bold transition-all ${milestone.status === 1 ? 'bg-blue-500 text-white shadow-sm ring-1 ring-blue-600' : 'text-slate-500 hover:text-blue-600 hover:bg-slate-200/50'}`}
-                                                            >
-                                                                <PlayCircleIcon className="w-3.5 h-3.5" /> In Progress
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => updateMilestone(subject.id, mIndex, 2)}
-                                                                className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-bold transition-all ${milestone.status === 2 ? 'bg-green-500 text-white shadow-sm ring-1 ring-green-600' : 'text-slate-500 hover:text-green-600 hover:bg-slate-200/50'}`}
-                                                            >
-                                                                <CheckCircleIcon className="w-3.5 h-3.5" /> Complete
-                                                            </button>
-                                                        </div>
+                                    {expanded === s.name && (
+                                        <div className="p-6 bg-slate-50 border-t border-slate-100 space-y-3">
+                                            {s.milestones.map(m => (
+                                                <div key={m.step} className="bg-white p-5 rounded-2xl border border-slate-200 flex items-center gap-6 shadow-sm">
+                                                    <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 font-black shrink-0">{m.step}</div>
+                                                    <div className="flex-1">
+                                                        <h4 className="font-bold text-slate-800 leading-tight mb-1 uppercase text-xs tracking-widest">{m.phase}</h4>
+                                                        <p className="text-sm text-slate-600 leading-snug">{m.desc}</p>
                                                     </div>
-                                                ))}
-                                            </div>
+                                                    <div className="flex gap-1 bg-slate-50 p-1 rounded-xl">
+                                                        {[0, 1, 2].map(v => (
+                                                            <div key={v} className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter ${m.status === v ? (v === 2 ? 'bg-green-500 text-white shadow-lg shadow-green-200' : v === 1 ? 'bg-blue-500 text-white shadow-lg shadow-blue-200' : 'bg-slate-300 text-white') : 'text-slate-300'}`}>
+                                                                {v === 0 ? 'Pending' : v === 1 ? 'In Progress' : 'Done'}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
                                 </div>
