@@ -21,32 +21,12 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // ============================================================================
-        // PASTE YOUR CSV DATA HERE IF YOU ARE OPENING THIS LOCALLY WITHOUT A SERVER
-        // ============================================================================
-        const csvData = `"Subject","Step Number","Phase","Description","Status"
-"Social Studies","1","Curriculum & UbD Training","Engaging in foundational training on the new curriculum expectations and the Understanding by Design framework.","0"
-"Social Studies","2","Framework Alignment & Tool Vetting","Introducing planning tools and establishing evaluation criteria based on the training.","0"
-"Social Studies","3","Macro-Level Unit Planning","Determining pacing, sequence, and overarching unit structure.","0"
-"Social Studies","4","Initial Unit Drafting","Collaboratively developing transfer goals and an assessment plan for the first unit(s).","0"
-"Social Studies","5","Resource Gathering & Exploration","Compiling, creating, and curating supporting resources.","0"
-"Social Studies","6","Consolidation & Streamlining","Reviewing multiple unit versions, making choices to trim down, and finalizing assessment plans.","0"
-"Social Studies","7","Micro-Level Lesson Build-Out","Folding developed units and gathered resources into specific, day-to-day lesson plans.","0"
-"Social Studies","8","Scaling & Progression","Prioritizing and developing supporting resources.","0"
-"Social Studies","9","Resource Hub Consolidation","Finalizing the curated list of resources and uploading them to the resource hub for teacher access, including the unit plans and supporting documents.","0"
-"Social Studies","10","Launch Preparation","Generating a list of logistical and material needs for a smooth rollout.","0"
-"Social Studies","Goal","Final September Goal","First unit for grade 7 completed.",""
-"Career Education and Financial Literacy (CEFL)","1","Curriculum & UbD Training","Engaging in foundational training on the new curriculum expectations and the Understanding by Design framework.","0"
-"Career Education and Financial Literacy (CEFL)","2","Framework Alignment & Tool Vetting","Introducing planning tools and establishing evaluation criteria based on the training.","0"
-"Career Education and Financial Literacy (CEFL)","3","Macro-Level Unit Planning","Determining pacing, sequence, and overarching unit structure.","0"
-"Career Education and Financial Literacy (CEFL)","4","Initial Unit Drafting","Collaboratively developing transfer goals and an assessment plan for the first unit(s).","0"
-"Career Education and Financial Literacy (CEFL)","5","Resource Gathering & Exploration","Compiling, creating, and curating supporting resources.","0"
-"Career Education and Financial Literacy (CEFL)","6","Consolidation & Streamlining","Reviewing multiple unit versions, making choices to trim down, and finalizing assessment plans.","0"
-"Career Education and Financial Literacy (CEFL)","7","Micro-Level Lesson Build-Out","Folding developed units and gathered resources into specific, day-to-day lesson plans.","0"
-"Career Education and Financial Literacy (CEFL)","8","Scaling & Progression","Prioritizing and developing supporting resources.","0"
-"Career Education and Financial Literacy (CEFL)","9","Resource Hub Consolidation","Finalizing the curated list of resources and uploading them to the resource hub for teacher access, including the unit plans and supporting documents.","0"
-"Career Education and Financial Literacy (CEFL)","10","Launch Preparation","Generating a list of logistical and material needs for a smooth rollout.","0"
-"Career Education and Financial Literacy (CEFL)","Goal","Final September Goal","First unit for grades 7, 8, and 9 completed.",""`;
+        /**
+         * CSV DATA FALLBACK
+         * If you are running this as a local file (file://), the browser might block 'fetch'.
+         * You can paste your 4 subjects from progress.csv here to ensure it works offline.
+         */
+        const csvDataFallback = `"Subject","Step Number","Phase","Description","Status"`;
 
         // --- INLINE ICON COMPONENTS ---
         const IconSVG = ({ children, className }) => (
@@ -66,24 +46,11 @@
         const ChevronDownIcon = ({className}) => <IconSVG className={className}><polyline points="6 9 12 15 18 9"></polyline></IconSVG>;
         const ChevronUpIcon = ({className}) => <IconSVG className={className}><polyline points="18 15 12 9 6 15"></polyline></IconSVG>;
 
-        // --- DEFAULT DATA ---
-        const defaultMilestones = [
-            { step: 1, phase: "Curriculum & UbD Training", description: "Engaging in foundational training on the new curriculum expectations and the Understanding by Design framework.", status: 0 },
-            { step: 2, phase: "Framework Alignment & Tool Vetting", description: "Introducing planning tools and establishing evaluation criteria based on the training.", status: 0 },
-            { step: 3, phase: "Macro-Level Unit Planning", description: "Determining pacing, sequence, and overarching unit structure.", status: 0 },
-            { step: 4, phase: "Initial Unit Drafting", description: "Collaboratively developing transfer goals and an assessment plan for the first unit(s).", status: 0 },
-            { step: 5, phase: "Resource Gathering & Exploration", description: "Compiling, creating, and curating supporting resources.", status: 0 },
-            { step: 6, phase: "Consolidation & Streamlining", description: "Reviewing multiple unit versions, making choices to trim down, and finalizing assessment plans.", status: 0 },
-            { step: 7, phase: "Micro-Level Lesson Build-Out", description: "Folding developed units and gathered resources into specific, day-to-day lesson plans.", status: 0 },
-            { step: 8, phase: "Scaling & Progression", description: "Prioritizing and developing supporting resources.", status: 0 },
-            { step: 9, phase: "Resource Hub Consolidation", description: "Finalizing the curated list of resources and uploading them to the resource hub for teacher access, including the unit plans and supporting documents.", status: 0 },
-            { step: 10, phase: "Launch Preparation", description: "Generating a list of logistical and material needs for a smooth rollout.", status: 0 }
-        ];
-
         function App() {
             const [subjects, setSubjects] = useState([]);
             const [now, setNow] = useState(new Date());
             const [expandedSubject, setExpandedSubject] = useState(null);
+            const [error, setError] = useState(null);
 
             useEffect(() => {
                 const timer = setInterval(() => setNow(new Date()), 60000);
@@ -91,38 +58,43 @@
             }, []);
 
             const parseCSV = (text) => {
-                const lines = text.split('\n').filter(l => l.trim() !== '');
-                
-                const parsedSubjects = {
-                    "Social Studies": { id: 's1', name: "Social Studies", goal: "First unit for grade 7 completed.", milestones: JSON.parse(JSON.stringify(defaultMilestones)) },
-                    "Career Education and Financial Literacy (CEFL)": { id: 's2', name: "Career Education and Financial Literacy (CEFL)", goal: "First unit for grades 7, 8, and 9 completed.", milestones: JSON.parse(JSON.stringify(defaultMilestones)) },
-                    "Science": { id: 's3', name: "Science", goal: "First unit completed.", milestones: JSON.parse(JSON.stringify(defaultMilestones)) },
-                    "Mathematics": { id: 's4', name: "Mathematics", goal: "First unit completed.", milestones: JSON.parse(JSON.stringify(defaultMilestones)) }
-                };
+                const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+                const parsedSubjects = {};
 
                 for (let i = 1; i < lines.length; i++) {
-                    const match = lines[i].match(/(?:"[^"]*"|[^,]+)/g);
-                    if (!match) continue;
-                    const cols = match.map(col => col.replace(/^"|"$/g, '').trim());
-                    
+                    const line = lines[i];
+                    // Basic CSV parser to handle quotes
+                    const cols = [];
+                    let current = '';
+                    let inQuotes = false;
+                    for (let char of line) {
+                        if (char === '"') inQuotes = !inQuotes;
+                        else if (char === ',' && !inQuotes) {
+                            cols.push(current.trim());
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    cols.push(current.trim());
+
                     const [subjectName, stepRaw, phase, desc, statusRaw] = cols;
                     if (!subjectName) continue;
 
                     if (!parsedSubjects[subjectName]) {
-                        parsedSubjects[subjectName] = { id: `s_${Date.now()}_${Math.random()}`, name: subjectName, goal: "", milestones: [] };
+                        parsedSubjects[subjectName] = { 
+                            id: `s_${subjectName.replace(/\s+/g, '_')}`, 
+                            name: subjectName, 
+                            goal: "", 
+                            milestones: [] 
+                        };
                     }
 
                     if (stepRaw && stepRaw.toLowerCase() === 'goal') {
                         parsedSubjects[subjectName].goal = desc;
                     } else if (stepRaw) {
-                        const stepNum = parseInt(stepRaw) || stepRaw;
-                        const mIndex = parsedSubjects[subjectName].milestones.findIndex(m => m.step === stepNum);
-                        
-                        if (mIndex >= 0) {
-                            parsedSubjects[subjectName].milestones[mIndex].phase = phase || '';
-                            parsedSubjects[subjectName].milestones[mIndex].description = desc || '';
-                            parsedSubjects[subjectName].milestones[mIndex].status = parseInt(statusRaw) || 0;
-                        } else {
+                        const stepNum = parseInt(stepRaw);
+                        if (!isNaN(stepNum)) {
                             parsedSubjects[subjectName].milestones.push({
                                 step: stepNum,
                                 phase: phase || '',
@@ -140,22 +112,28 @@
 
                 if (newSubjectsArray.length > 0) {
                     setSubjects(newSubjectsArray);
+                    setError(null);
+                } else {
+                    setError("No subjects found in CSV. Please check formatting.");
                 }
             };
 
             useEffect(() => {
-                const loadCSV = async () => {
+                const loadData = async () => {
                     try {
                         const response = await fetch('./progress.csv');
-                        if (!response.ok) throw new Error("File not found via fetch");
+                        if (!response.ok) throw new Error();
                         const text = await response.text();
                         parseCSV(text);
-                    } catch (error) {
-                        console.log("Using embedded CSV data (Browser local file execution).");
-                        parseCSV(csvData);
+                    } catch (e) {
+                        if (csvDataFallback.split('\n').length > 1) {
+                            parseCSV(csvDataFallback);
+                        } else {
+                            setError("Could not load 'progress.csv'. Ensure it is in the same folder as this file.");
+                        }
                     }
                 };
-                loadCSV();
+                loadData();
             }, []);
 
             const targetDate = new Date('2026-09-01T00:00:00');
@@ -166,6 +144,7 @@
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
             });
 
+            // Local state update only (User must update CSV to persist)
             const updateMilestone = (subjectId, stepIdx, newStatus) => {
                 setSubjects(prev => prev.map(sub => {
                     if (sub.id !== subjectId) return sub;
@@ -183,7 +162,7 @@
                 let colorClass, label, Icon;
                 if (percentage < 25) {
                     colorClass = 'text-blue-500 bg-blue-100 border-blue-200';
-                    label = 'Cold (Just Started)';
+                    label = 'Cold';
                     Icon = SnowflakeIcon;
                 } else if (percentage < 50) {
                     colorClass = 'text-yellow-600 bg-yellow-100 border-yellow-200';
@@ -191,11 +170,11 @@
                     Icon = ThermometerIcon;
                 } else if (percentage < 80) {
                     colorClass = 'text-orange-500 bg-orange-100 border-orange-200';
-                    label = 'Hot (Making Great Progress)';
+                    label = 'Hot';
                     Icon = ThermometerSunIcon;
                 } else {
                     colorClass = 'text-red-600 bg-red-100 border-red-200';
-                    label = 'On Fire! (Nearly Complete)';
+                    label = 'On Fire!';
                     Icon = FlameIcon;
                 }
 
@@ -210,7 +189,7 @@
 
             const totalProjectPercentage = subjects.length > 0 ? Math.round(
                 (subjects.reduce((acc, sub) => acc + sub.milestones.reduce((mAcc, m) => mAcc + m.status, 0), 0) / 
-                (subjects.length * 20)) * 100
+                (subjects.reduce((acc, sub) => acc + sub.milestones.length, 0) * 2)) * 100
             ) : 0;
 
             return (
@@ -231,21 +210,21 @@
                                         <ClockIcon className="w-8 h-8 text-indigo-400" />
                                     </div>
                                     <div>
-                                        <p className="text-slate-300 text-sm font-medium uppercase tracking-wider">Time to Launch</p>
+                                        <p className="text-slate-300 text-sm font-medium uppercase tracking-wider">Launch Countdown</p>
                                         <div className="flex items-baseline gap-2">
                                             <span className={`text-4xl font-extrabold ${daysRemaining < 30 ? 'text-red-400' : 'text-indigo-300'}`}>
                                                 {daysRemaining}
                                             </span>
                                             <span className="text-slate-400">days left</span>
                                         </div>
-                                        <p className="text-xs text-slate-500">Due: Sept 1, 2026</p>
+                                        <p className="text-xs text-slate-500">Goal: September 1, 2026</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="mt-8">
                                 <div className="flex justify-between text-sm mb-2 font-medium">
-                                    <span>Overall Project Completion</span>
+                                    <span>Total Scope Completion</span>
                                     <span>{totalProjectPercentage}%</span>
                                 </div>
                                 <div className="w-full bg-slate-800 rounded-full h-3">
@@ -256,35 +235,43 @@
                     </header>
 
                     <main className="max-w-7xl mx-auto px-4 md:px-12 mt-8">
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl mb-8 font-medium">
+                                {error}
+                            </div>
+                        )}
+
                         <h2 className="text-xl font-bold mb-4 text-slate-700 flex items-center gap-2">
                             <ThermometerSunIcon className="w-6 h-6 text-slate-500" />
-                            Subject Temperature Checks
+                            Subject Progress & Heat Maps
                         </h2>
+                        
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                             {subjects.map(subject => {
                                 const temp = getTemperatureData(subject.milestones);
                                 const Icon = temp.Icon;
                                 return (
-                                    <div key={`temp-${subject.id}`} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
+                                    <div key={`temp-${subject.id}`} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between hover:shadow-md transition">
                                         <div>
                                             <h3 className="font-bold text-lg mb-1 leading-tight text-slate-800">{subject.name}</h3>
-                                            <p className="text-xs text-slate-500 mb-4 line-clamp-2" title={subject.goal}>{subject.goal || 'No goal set'}</p>
+                                            <p className="text-xs text-slate-500 mb-4 line-clamp-3 italic" title={subject.goal}>{subject.goal || 'Final goal not defined'}</p>
                                         </div>
-                                        
                                         <div>
                                             <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border mb-4 ${temp.colorClass}`}>
                                                 <Icon className="w-4 h-4" />
                                                 {temp.label}
                                             </div>
-                                            
                                             <div className="flex justify-between items-end mb-2 text-sm font-medium">
                                                 <span className="text-slate-600">Score: {temp.score}/{temp.maxScore}</span>
                                                 <span className="text-slate-900 font-bold">{temp.percentage}%</span>
                                             </div>
-                                            <div className="w-full bg-slate-100 rounded-full h-2">
+                                            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                                                 <div 
-                                                    className={`h-2 rounded-full transition-all duration-500 ${temp.percentage === 100 ? 'bg-green-500' : 'bg-current'}`} 
-                                                    style={{ width: `${temp.percentage}%`, backgroundColor: temp.percentage < 25 ? '#3b82f6' : temp.percentage < 50 ? '#ca8a04' : temp.percentage < 80 ? '#f97316' : temp.percentage === 100 ? '#22c55e' : '#dc2626' }}
+                                                    className="h-2 transition-all duration-500" 
+                                                    style={{ 
+                                                        width: `${temp.percentage}%`, 
+                                                        backgroundColor: temp.percentage < 25 ? '#3b82f6' : temp.percentage < 50 ? '#ca8a04' : temp.percentage < 80 ? '#f97316' : '#22c55e' 
+                                                    }}
                                                 ></div>
                                             </div>
                                         </div>
@@ -295,8 +282,9 @@
 
                         <h2 className="text-xl font-bold mb-4 text-slate-700 flex items-center gap-2">
                             <CheckCircleIcon className="w-6 h-6 text-slate-500" />
-                            Milestone Breakdown
+                            Detailed Implementation Steps
                         </h2>
+                        
                         <div className="space-y-4">
                             {subjects.map((subject, subIndex) => (
                                 <div key={`detail-${subject.id}`} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
@@ -310,7 +298,7 @@
                                             </div>
                                             <div>
                                                 <h3 className="font-bold text-xl text-slate-800">{subject.name}</h3>
-                                                <p className="text-sm text-slate-500">{subject.milestones.filter(m => m.status === 2).length} of {subject.milestones.length} milestones completed</p>
+                                                <p className="text-sm text-slate-500">{subject.milestones.filter(m => m.status === 2).length} of {subject.milestones.length} milestones complete</p>
                                             </div>
                                         </div>
                                         {expandedSubject === subject.id ? <ChevronUpIcon className="w-6 h-6 text-slate-400" /> : <ChevronDownIcon className="w-6 h-6 text-slate-400" />}
@@ -321,7 +309,6 @@
                                             <div className="space-y-3">
                                                 {subject.milestones.map((milestone, mIndex) => (
                                                     <div key={mIndex} className="bg-white rounded-xl p-4 border border-slate-200 flex flex-col lg:flex-row gap-4 justify-between lg:items-center hover:border-indigo-200 transition shadow-sm">
-                                                        
                                                         <div className="flex items-start gap-4 flex-1">
                                                             <div className="min-w-[2.5rem] h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-600 font-bold text-sm">
                                                                 {milestone.step}
@@ -337,22 +324,21 @@
                                                                 onClick={() => updateMilestone(subject.id, mIndex, 0)}
                                                                 className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-bold transition-all ${milestone.status === 0 ? 'bg-white text-slate-700 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
                                                             >
-                                                                <CircleIcon className="w-3.5 h-3.5" /> Pending (0)
+                                                                <CircleIcon className="w-3.5 h-3.5" /> Pending
                                                             </button>
                                                             <button 
                                                                 onClick={() => updateMilestone(subject.id, mIndex, 1)}
                                                                 className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-bold transition-all ${milestone.status === 1 ? 'bg-blue-500 text-white shadow-sm ring-1 ring-blue-600' : 'text-slate-500 hover:text-blue-600 hover:bg-slate-200/50'}`}
                                                             >
-                                                                <PlayCircleIcon className="w-3.5 h-3.5" /> In Progress (1)
+                                                                <PlayCircleIcon className="w-3.5 h-3.5" /> In Progress
                                                             </button>
                                                             <button 
                                                                 onClick={() => updateMilestone(subject.id, mIndex, 2)}
                                                                 className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-bold transition-all ${milestone.status === 2 ? 'bg-green-500 text-white shadow-sm ring-1 ring-green-600' : 'text-slate-500 hover:text-green-600 hover:bg-slate-200/50'}`}
                                                             >
-                                                                <CheckCircleIcon className="w-3.5 h-3.5" /> Complete (2)
+                                                                <CheckCircleIcon className="w-3.5 h-3.5" /> Complete
                                                             </button>
                                                         </div>
-                                                        
                                                     </div>
                                                 ))}
                                             </div>
